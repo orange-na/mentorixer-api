@@ -5,8 +5,8 @@ import (
 	"main/internal/repository"
 	"main/pkg/db"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	// "github.com/rs/cors"
 )
 
 func Run() {
@@ -25,11 +25,12 @@ func Run() {
 	taskHandler := handler.NewTaskHandler(taskRepo)
 	userHandler := handler.NewUserHandler(userRepo)
 
-	// c := cors.New(cors.Options{
-	// 	AllowedOrigins: []string{"*"},
-	// 	AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-	// 	AllowedHeaders: []string{"Accept", "Content-Type", "Content-Length", "Accept-Encoding", "X-CSRF-Token", "Authorization"},
-	// })
+	// CORSの設定
+	config := cors.DefaultConfig()
+	config.AllowOrigins = []string{"*"}
+	config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}
+	config.AllowHeaders = []string{"Origin", "Content-Type", "Accept", "Authorization"}
+	r.Use(cors.New(config))
 
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{
