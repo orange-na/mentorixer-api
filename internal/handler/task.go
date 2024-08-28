@@ -1,82 +1,86 @@
 package handler
 
 import (
-	"encoding/json"
 	"net/http"
 
 	"main/internal/model"
-	"main/internal/repository"
 
+	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
-type TaskHandler struct {
-	taskRepo *repository.TaskRepository
+type Handler struct {
+	db *gorm.DB
 }
 
-func NewTaskHandler(taskRepo *repository.TaskRepository) *TaskHandler {
-	return &TaskHandler{taskRepo: taskRepo}
+func NewHandler(db *gorm.DB) *Handler {
+	return &Handler{db: db}
 }
 
-func (h *TaskHandler) GetTasks(w http.ResponseWriter, r *http.Request) {
-	tasks, err := h.taskRepo.GetAll()
+type User model.User
+type Task model.Task
+
+func (h *Handler) GetTasks(c *gin.Context) {
+	var tasks []Task
+	err := h.db.Find(&tasks).Error
+
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	json.NewEncoder(w).Encode(tasks)
+	c.JSON(http.StatusOK, tasks)
 }
 
-func (h *TaskHandler) AddTask(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) AddTask(c *gin.Context) {
 	var task model.Task
-	err := json.NewDecoder(r.Body).Decode(&task)
+	err := c.ShouldBindJSON(&task)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	task.Id = uuid.New().String()
+	task.ID = uuid.New().String()
 
-	err = h.taskRepo.Create(task)
+	err = h.db.Create(&task).Error
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(task)
+	c.JSON(http.StatusCreated, task)
 }
 
-func (h *TaskHandler) EditTask(w http.ResponseWriter, r *http.Request) {
-	taskID := r.URL.Path[len("/tasks/"):]
+func (h *Handler) EditTask(c *gin.Context) {
+	taskID := c.Param("id")
 
 	var task model.Task
-	err := json.NewDecoder(r.Body).Decode(&task)
+	err := c.ShouldBindJSON(&task)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	task.Id = taskID
+	task.ID = taskID
 
-	err = h.taskRepo.Update(task)
+	err = h.db.Save(&task).Error
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	json.NewEncoder(w).Encode(task)
+	c.JSON(http.StatusOK, task)
 }
 
-func (h *TaskHandler) DeleteTask(w http.ResponseWriter, r *http.Request) {
-	taskID := r.URL.Path[len("/tasks/"):]
+func (h *Handler) DeleteTask(c *gin.Context) {
+    taskID := c.Param("id")
 
-	err := h.taskRepo.Delete(taskID)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+    err := h.db.Where("id = ?", taskID).Delete(&model.Task{}).Error
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+        return
+    }
 
-	w.WriteHeader(http.StatusOK)
+    c.Status(http.StatusOK)
 }

@@ -24,7 +24,7 @@ func (r *TaskRepository) GetAll() ([]model.Task, error) {
 	var tasks []model.Task
 	for rows.Next() {
 		var task model.Task
-		err := rows.Scan(&task.Id, &task.UserID, &task.Title)
+		err := rows.Scan(&task.ID, &task.UserID, &task.Title)
 		if err != nil {
 			return nil, err
 		}
@@ -35,12 +35,12 @@ func (r *TaskRepository) GetAll() ([]model.Task, error) {
 }
 
 func (r *TaskRepository) Create(task model.Task) error {
-	_, err := r.db.Exec("INSERT INTO task (id, userId, title) VALUES (?, ?, ?)", task.Id, task.UserID, task.Title)
+	_, err := r.db.Exec("INSERT INTO task (id, userId, title) VALUES (?, ?, ?)", task.ID, task.UserID, task.Title)
 	return err
 }
 
 func (r *TaskRepository) Update(task model.Task) error {
-	_, err := r.db.Exec("UPDATE task SET title = ? WHERE id = ?", task.Title, task.Id)
+	_, err := r.db.Exec("UPDATE task SET title = ? WHERE id = ?", task.Title, task.ID)
 	return err
 }
 
