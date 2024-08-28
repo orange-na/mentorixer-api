@@ -1,16 +1,16 @@
 package server
 
 import (
-	"net/http"
-
 	"main/internal/handler"
 	"main/internal/repository"
 	"main/pkg/db"
 
-	"github.com/rs/cors"
+	"github.com/gin-gonic/gin"
+	// "github.com/rs/cors"
 )
 
 func Run() {
+	r := gin.Default()
 	db, err := db.ConnectDB()
 	if err != nil {
 		panic(err)
@@ -25,41 +25,46 @@ func Run() {
 	taskHandler := handler.NewTaskHandler(taskRepo)
 	userHandler := handler.NewUserHandler(userRepo)
 
-	c := cors.New(cors.Options{
-		AllowedOrigins: []string{"*"},
-		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowedHeaders: []string{"Accept", "Content-Type", "Content-Length", "Accept-Encoding", "X-CSRF-Token", "Authorization"},
+	// c := cors.New(cors.Options{
+	// 	AllowedOrigins: []string{"*"},
+	// 	AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+	// 	AllowedHeaders: []string{"Accept", "Content-Type", "Content-Length", "Accept-Encoding", "X-CSRF-Token", "Authorization"},
+	// })
+
+	r.GET("/ping", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"message": "pong",
+		})
 	})
 
-	http.Handle("/tasks", c.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		switch r.Method {
-		case http.MethodGet:
-			taskHandler.GetTasks(w, r)
-		case http.MethodPost:
-			taskHandler.AddTask(w, r)
-		default:
-			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		}
-	})))
-	http.Handle("/tasks/", c.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		switch r.Method {
-		case http.MethodPut:
-			taskHandler.EditTask(w, r)
-		case http.MethodDelete:
-			taskHandler.DeleteTask(w, r)
-		default:
-			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		}
-	})))
+	r.GET("/tasks", func(c *gin.Context) {
+		taskHandler.GetTasks(c.Writer, c.Request)
+	})
 
-	http.Handle("/sign-up", c.Handler(http.HandlerFunc(userHandler.SignUp)))
-	http.Handle("/sign-in", c.Handler(http.HandlerFunc(userHandler.SignIn)))
-	http.Handle("/users", c.Handler(http.HandlerFunc(userHandler.GetUsers)))
+	r.POST("/tasks", func(c *gin.Context) {
+		taskHandler.AddTask(c.Writer, c.Request)
+	})
 
-	server := http.Server{
-		Addr:    ":8080",
-		Handler: nil,
-	}
+	r.PUT("/tasks/:id", func(c *gin.Context) {
+		taskHandler.EditTask(c.Writer, c.Request)
+	})
 
-	server.ListenAndServe()
+	r.DELETE("/tasks/:id", func(c *gin.Context) {
+		taskHandler.DeleteTask(c.Writer, c.Request)
+	})
+
+	r.GET("/users", func(c *gin.Context) {
+		userHandler.GetUsers(c.Writer, c.Request)
+	})
+
+	r.POST("/sign-up", func(c *gin.Context) {
+		userHandler.SignUp(c.Writer, c.Request)
+	})
+
+	r.POST("/sign-in", func(c *gin.Context) {
+		userHandler.SignIn(c.Writer, c.Request)
+	})
+
+	r.Run(":8080")
+
 }
