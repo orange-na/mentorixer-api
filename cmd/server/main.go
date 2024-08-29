@@ -11,15 +11,12 @@ import (
 
 func Run() {
 	r := gin.Default()
-	db, err := db.Init()
-	if err != nil {
-		panic(err)
-	}
-	
+	db := db.Init()
+
 	r.Use(middleware.SetupCORS())
 
-	taskHandler := handler.NewHandler(db)
-	router.SetupRoutes(r, taskHandler)
+	taskHandler := handler.NewTaskHandler(db)
+	router.TaskRoutes(r, taskHandler)
 
 	r.Run(":8080")
 }

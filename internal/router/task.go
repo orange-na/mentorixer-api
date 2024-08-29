@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func SetupRoutes(r *gin.Engine, taskHandler *handler.Handler) {
+func TaskRoutes(r *gin.Engine, taskHandler *handler.Handler) {
 	tasksGroup := r.Group("/tasks")
 	{
 		tasksGroup.GET("", taskHandler.GetTasks)

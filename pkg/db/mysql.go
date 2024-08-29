@@ -18,15 +18,22 @@ const (
 )
 
 
-func Init() (*gorm.DB, error) {
+func Init() (*gorm.DB) {
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local", user, password, host, port, dbname)
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
-		panic("failed to connect database")
+        panic(fmt.Sprintf("failed to connect database: %v", err))
 	}
 
-	db.Migrator().DropTable(&model.User{}, &model.Task{})
-	db.AutoMigrate(&model.User{}, &model.Task{})
-	
-	return db, err
+	err = db.Migrator().DropTable(&model.User{}, &model.Task{}, &model.Friend{}, &model.Room{}, &model.Message{})
+	if err != nil {
+		panic(err)
+	}
+
+	err = db.AutoMigrate(&model.User{}, &model.Task{}, &model.Friend{}, &model.Room{}, &model.Message{})
+	if err != nil {
+		panic(err)
+	}
+
+	return db
 }

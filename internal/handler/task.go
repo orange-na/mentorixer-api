@@ -14,11 +14,10 @@ type Handler struct {
 	db *gorm.DB
 }
 
-func NewHandler(db *gorm.DB) *Handler {
+func NewTaskHandler(db *gorm.DB) *Handler {
 	return &Handler{db: db}
 }
 
-type User model.User
 type Task model.Task
 
 func (h *Handler) GetTasks(c *gin.Context) {
