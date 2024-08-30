@@ -11,13 +11,13 @@ import (
 
 func Run() {
 	r := gin.Default()
-	db := db.Init()
+	db.Init()
 
 	r.Use(middleware.SetupCORS())
 
-	taskHandler := handler.NewTaskHandler(db)
-	userHandler := handler.NewUserHandler(db)
-	authHandler := handler.NewAuthHandler(db)
+	taskHandler := handler.NewTaskHandler()
+	userHandler := handler.NewUserHandler()
+	authHandler := handler.NewAuthHandler()
 
 	router.TaskRoutes(r, taskHandler)
 	router.UserRoutes(r, userHandler)

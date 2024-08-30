@@ -16,8 +16,9 @@ const (
 	dbname   = "mentorixer"
 )
 
+var DB *gorm.DB
 
-func Init() (*gorm.DB) {
+func Init(){
 	dsn := fmt.Sprintf("%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local", user, host, port, dbname)
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
@@ -34,5 +35,5 @@ func Init() (*gorm.DB) {
 		panic(err)
 	}
 
-	return db
+	DB = db
 }

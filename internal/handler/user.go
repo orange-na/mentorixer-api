@@ -6,27 +6,22 @@ import (
 	"main/internal/model"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
-type UserHandler struct {
-	db *gorm.DB
+type UserHandler struct {}
+
+func NewUserHandler() *UserHandler {
+	return &UserHandler{}
 }
 
-func NewUserHandler(db *gorm.DB) *UserHandler {
-	return &UserHandler{db: db}
-}
-
-type User model.Task
+type User model.User
 
 func (h *UserHandler) GetMe(c *gin.Context) {
-	var tasks []Task
-	err := h.db.Find(&tasks).Error
-
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	user, exist := c.Get("user")
+	if !exist {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "user not found"})
 		return
 	}
 
-	c.JSON(http.StatusOK, tasks)
+	c.JSON(http.StatusOK, user)
 }

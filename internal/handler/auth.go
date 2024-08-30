@@ -4,19 +4,17 @@ import (
 	"net/http"
 
 	"main/internal/model"
+	"main/pkg/db"
 	auth "main/utils"
 
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
-	"gorm.io/gorm"
 )
 
-type AuthHandler struct {
-	db *gorm.DB
-}
+type AuthHandler struct {}
 
-func NewAuthHandler(db *gorm.DB) *AuthHandler {
-	return &AuthHandler{db: db}
+func NewAuthHandler() *AuthHandler {
+	return &AuthHandler{}
 }
 
 type Auth model.Task
@@ -34,7 +32,7 @@ func (h *AuthHandler) SignUp(c *gin.Context) {
 	}
 
 	var existingUser model.User
-	err = h.db.Where("email = ?", signUpInput.Email).First(&existingUser).Error
+	err = db.DB.Where("email = ?", signUpInput.Email).First(&existingUser).Error
 	if err == nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "user already exists"})
 		return
@@ -52,7 +50,7 @@ func (h *AuthHandler) SignUp(c *gin.Context) {
 		EncryptedPassword: string(EncryptedPassword),
 	}
 
-	err = h.db.Create(&user).Error
+	err = db.DB.Create(&user).Error
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -73,7 +71,7 @@ func (h *AuthHandler) SignIn(c *gin.Context) {
 	}
 
 	var user model.User
-	err = h.db.Where("email = ?", signInInput.Email).First(&user).Error
+	err = db.DB.Where("email = ?", signInInput.Email).First(&user).Error
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "user not found"})
 		return

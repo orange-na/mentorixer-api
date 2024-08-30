@@ -4,25 +4,23 @@ import (
 	"net/http"
 
 	"main/internal/model"
+	"main/pkg/db"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"gorm.io/gorm"
 )
 
-type TaskHandler struct {
-	db *gorm.DB
-}
+type TaskHandler struct {}
 
-func NewTaskHandler(db *gorm.DB) *TaskHandler {
-	return &TaskHandler{db: db}
+func NewTaskHandler() *TaskHandler {
+	return &TaskHandler{}
 }
 
 type Task model.Task
 
 func (h *TaskHandler) GetTasks(c *gin.Context) {
 	var tasks []Task
-	err := h.db.Find(&tasks).Error
+	err := db.DB.Find(&tasks).Error
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -42,7 +40,7 @@ func (h *TaskHandler) AddTask(c *gin.Context) {
 
 	task.ID = uuid.New().String()
 
-	err = h.db.Create(&task).Error
+	err = db.DB.Create(&task).Error
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -63,7 +61,7 @@ func (h *TaskHandler) EditTask(c *gin.Context) {
 
 	task.ID = taskID
 
-	err = h.db.Save(&task).Error
+	err = db.DB.Save(&task).Error
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -75,7 +73,7 @@ func (h *TaskHandler) EditTask(c *gin.Context) {
 func (h *TaskHandler) DeleteTask(c *gin.Context) {
     taskID := c.Param("id")
 
-    err := h.db.Where("id = ?", taskID).Delete(&model.Task{}).Error
+    err := db.DB.Where("id = ?", taskID).Delete(&model.Task{}).Error
     if err != nil {
         c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
         return
