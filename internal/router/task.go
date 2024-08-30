@@ -6,12 +6,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func TaskRoutes(r *gin.Engine, taskHandler *handler.Handler) {
-	tasksGroup := r.Group("/tasks")
+func TaskRoutes(r *gin.Engine, taskHandler *handler.TaskHandler) {
+	taskGroup := r.Group("/tasks")
 	{
-		tasksGroup.GET("", taskHandler.GetTasks)
-		tasksGroup.POST("", taskHandler.AddTask)
-		tasksGroup.PUT("/:id", taskHandler.EditTask)
-		tasksGroup.DELETE("/:id", taskHandler.DeleteTask)
+		taskGroup.GET("", taskHandler.GetTasks)
+		taskGroup.POST("", taskHandler.AddTask)
+		taskGroup.PUT("/:id", taskHandler.EditTask)
+		taskGroup.DELETE("/:id", taskHandler.DeleteTask)
 	}
 }

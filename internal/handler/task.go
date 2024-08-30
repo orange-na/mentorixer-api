@@ -10,17 +10,17 @@ import (
 	"gorm.io/gorm"
 )
 
-type Handler struct {
+type TaskHandler struct {
 	db *gorm.DB
 }
 
-func NewTaskHandler(db *gorm.DB) *Handler {
-	return &Handler{db: db}
+func NewTaskHandler(db *gorm.DB) *TaskHandler {
+	return &TaskHandler{db: db}
 }
 
 type Task model.Task
 
-func (h *Handler) GetTasks(c *gin.Context) {
+func (h *TaskHandler) GetTasks(c *gin.Context) {
 	var tasks []Task
 	err := h.db.Find(&tasks).Error
 
@@ -32,7 +32,7 @@ func (h *Handler) GetTasks(c *gin.Context) {
 	c.JSON(http.StatusOK, tasks)
 }
 
-func (h *Handler) AddTask(c *gin.Context) {
+func (h *TaskHandler) AddTask(c *gin.Context) {
 	var task model.Task
 	err := c.ShouldBindJSON(&task)
 	if err != nil {
@@ -51,7 +51,7 @@ func (h *Handler) AddTask(c *gin.Context) {
 	c.JSON(http.StatusCreated, task)
 }
 
-func (h *Handler) EditTask(c *gin.Context) {
+func (h *TaskHandler) EditTask(c *gin.Context) {
 	taskID := c.Param("id")
 
 	var task model.Task
@@ -72,7 +72,7 @@ func (h *Handler) EditTask(c *gin.Context) {
 	c.JSON(http.StatusOK, task)
 }
 
-func (h *Handler) DeleteTask(c *gin.Context) {
+func (h *TaskHandler) DeleteTask(c *gin.Context) {
     taskID := c.Param("id")
 
     err := h.db.Where("id = ?", taskID).Delete(&model.Task{}).Error

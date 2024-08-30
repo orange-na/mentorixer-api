@@ -16,7 +16,9 @@ func Run() {
 	r.Use(middleware.SetupCORS())
 
 	taskHandler := handler.NewTaskHandler(db)
+	userHandler := handler.NewUserHandler(db)
 	router.TaskRoutes(r, taskHandler)
+	router.UserRoutes(r, userHandler)
 
 	r.Run(":8080")
 }
