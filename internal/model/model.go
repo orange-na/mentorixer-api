@@ -21,7 +21,7 @@ type Friend struct {
 	Name    			string 	`gorm:"not null"`
 	Mbti   				string 	`gorm:"not null"`
 	Age    				int 	`gorm:"not null"`
-	Sex   				string	`gorm:"not null"`
+	Gender   		    string	`gorm:"not null"`
 	ProfilePictureUrl 	*string	
 	Description 		*string
 	Rooms               []Room

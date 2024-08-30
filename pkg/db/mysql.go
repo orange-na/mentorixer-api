@@ -25,10 +25,10 @@ func Init(){
         panic(fmt.Sprintf("failed to connect database: %v", err))
 	}
 
-	err = db.Migrator().DropTable(&model.User{}, &model.Task{}, &model.Friend{}, &model.Room{}, &model.Message{})
-	if err != nil {
-		panic(err)
-	}
+	// err = db.Migrator().DropTable(&model.User{}, &model.Task{}, &model.Friend{}, &model.Room{}, &model.Message{})
+	// if err != nil {
+	// 	panic(err)
+	// }
 
 	err = db.AutoMigrate(&model.User{}, &model.Task{}, &model.Friend{}, &model.Room{}, &model.Message{})
 	if err != nil {

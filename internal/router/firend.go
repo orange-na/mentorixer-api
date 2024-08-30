@@ -12,5 +12,8 @@ func FriendRoutes(r *gin.Engine, friendHandler *handler.FriendHandler) {
 	FriendRGroup.Use(middleware.JwtAuthMiddleware())
 	{
 		FriendRGroup.GET("/", friendHandler.GetAllFriends)
+		FriendRGroup.POST("/", friendHandler.CreateFriend)
+		FriendRGroup.PUT("/:id", friendHandler.EditFriend)
+		FriendRGroup.DELETE("/:id", friendHandler.DeleteFriend)
 	}
 }
