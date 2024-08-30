@@ -5,10 +5,10 @@ import (
 
 	"main/internal/model"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
-	// "github.com/dgrijalva/jwt-go"
 )
 
 type AuthHandler struct {
@@ -62,4 +62,39 @@ func (h *AuthHandler) SignUp(c *gin.Context) {
 }
 
 func (h *AuthHandler) SignIn(c *gin.Context) {
+	var signInInput struct {
+		Email    string `json:"email" binding:"required"`
+		Password string `json:"password" binding:"required"`
+	}
+	err := c.ShouldBindJSON(&signInInput)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	var user model.User
+	err = h.db.Where("email = ?", signInInput.Email).First(&user).Error
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "user not found"})
+		return
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(user.EncryptedPassword), []byte(signInInput.Password))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid password"})
+		return
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"email": user.Email,
+	})
+	tokenString, err := token.SignedString([]byte("secret"))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+    c.JSON(http.StatusOK, gin.H{
+        "token": tokenString,
+    })
 }
