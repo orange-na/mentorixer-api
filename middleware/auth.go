@@ -34,11 +34,7 @@ func JwtAuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		c.Set("user", map[string]interface{}{
-			"id":       user.ID,
-			"name":     user.Name,
-			"email":    user.Email,
-		})
+		c.Set("user", user)
 		c.Next()
 	}
 }
