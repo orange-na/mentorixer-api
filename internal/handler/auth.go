@@ -17,8 +17,6 @@ func NewAuthHandler() *AuthHandler {
 	return &AuthHandler{}
 }
 
-type Auth model.Task
-
 func (h *AuthHandler) SignUp(c *gin.Context) {
 	var signUpInput struct {
 		Name     string `json:"name" binding:"required"`
