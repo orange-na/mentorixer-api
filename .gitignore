@@ -1,0 +1,18 @@
+.idea/
+# Keep environment variables out of version control
+.env
+mysql/
+dist/
+
+# Local .terraform directories
+**/.terraform/*
+
+# .tfstate files
+*.tfstate
+*.tfstate.*
+
+# Crash log files
+crash.log
+
+
+.DS_Store
