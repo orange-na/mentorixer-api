@@ -17,8 +17,11 @@ func Run() {
 
 	taskHandler := handler.NewTaskHandler(db)
 	userHandler := handler.NewUserHandler(db)
+	authHandler := handler.NewAuthHandler(db)
+
 	router.TaskRoutes(r, taskHandler)
 	router.UserRoutes(r, userHandler)
+	router.AuthRoutes(r, authHandler)
 
 	r.Run(":8080")
 }
