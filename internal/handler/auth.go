@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	"main/internal/model"
+	auth "main/utils"
 
-	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
@@ -85,10 +85,7 @@ func (h *AuthHandler) SignIn(c *gin.Context) {
 		return
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"email": user.Email,
-	})
-	tokenString, err := token.SignedString([]byte("secret"))
+	tokenString, err := auth.GenerateToken(user.ID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
