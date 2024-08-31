@@ -47,3 +47,27 @@ func (h *UserHandler) GetAllFriends(c *gin.Context) {
 
 	c.JSON(http.StatusOK, friends)
 }
+
+func (h *UserHandler) GetFriend(c *gin.Context) {
+	user, exist := c.Get("user")
+	if !exist {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "user not found"})
+		return
+	}
+
+	u, ok := user.(model.User)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "user not found"})
+		return
+	}
+
+	friendID := c.Param("friend_id")
+	var friend model.Friend
+	err := db.DB.Where("user_id = ? AND id = ?", u.ID, friendID).First(&friend).Error
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, friend)
+}
