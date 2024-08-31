@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"strconv"
 
 	"main/internal/model"
 	"main/pkg/db"
@@ -30,11 +31,11 @@ func (h *FriendHandler) CreateFriend(c *gin.Context) {
 	}
 
 	var createFriendInput struct {
-		Name string `json:"name" binding:"required"`
-		Mbti string `json:"mbti" binding:"required"`
-		Age int `json:"age" binding:"required"`
-		Gender string `json:"gender" binding:"required"`
-		Description *string `json:"description"` 
+		Name 			  string  `json:"name" binding:"required"`
+		Mbti 			  string  `json:"mbti" binding:"required"`
+		Age 		      string  `json:"age" binding:"required"`
+		Gender 			  string  `json:"gender" binding:"required"`
+		Description 	  *string `json:"description"` 
 		ProfilePictureUrl *string `json:"profile_picture_url"`
 	}
 
@@ -44,11 +45,17 @@ func (h *FriendHandler) CreateFriend(c *gin.Context) {
 		return
 	}
 
+	age, err := strconv.Atoi(createFriendInput.Age)
+    if err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "invalid age value"})
+        return
+    }
+
 	friend := model.Friend{
 		UserID: u.ID,
 		Name: createFriendInput.Name,
 		Mbti: createFriendInput.Mbti,
-		Age: createFriendInput.Age,
+		Age: age,
 		Gender: createFriendInput.Gender,
 		Description: createFriendInput.Description,
 		ProfilePictureUrl: createFriendInput.ProfilePictureUrl,
@@ -73,7 +80,7 @@ func (h *FriendHandler) CreateFriend(c *gin.Context) {
         c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
         return
     }
-	
+
 	c.Status(http.StatusCreated)
 }
 
@@ -98,14 +105,14 @@ func (h *FriendHandler) EditFriend(c *gin.Context) {
 		return
 	}
 
-	var editFriendInput struct {
-		Name string `json:"name"`
-		Mbti string `json:"mbti"`
-		Age int `json:"age"`
-		Gender string `json:"gender"`
-		Description *string `json:"description"`
-		ProfilePictureUrl *string `json:"profile_picture_url"`
-	}
+    var editFriendInput struct {
+        Name              string   `json:"name"`
+        Mbti              string   `json:"mbti"`
+        Age               string   `json:"age"`
+        Gender            string   `json:"gender"`
+        Description       *string  `json:"description"`
+        ProfilePictureUrl *string  `json:"profile_picture_url"`
+    }
 
 	err = c.ShouldBindJSON(&editFriendInput)
 	if err != nil {
@@ -113,11 +120,17 @@ func (h *FriendHandler) EditFriend(c *gin.Context) {
 		return
 	}
 
+	age, err := strconv.Atoi(editFriendInput.Age)
+    if err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "invalid age value"})
+        return
+    }
+
 	friend := model.Friend{
 		UserID: u.ID,
 		Name: editFriendInput.Name,
 		Mbti: editFriendInput.Mbti,
-		Age: editFriendInput.Age,
+		Age: age,
 		Gender: editFriendInput.Gender,
 		Description: editFriendInput.Description,
 		ProfilePictureUrl: editFriendInput.ProfilePictureUrl,
