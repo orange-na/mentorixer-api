@@ -19,6 +19,11 @@ func Run() {
 		panic(err)
     }
 
+	// content, err := gimini.GenerateContent("Write a story about a magic backpack.")
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// fmt.Println(content)
 
 	r := gin.Default()
 	db.Init()
