@@ -16,5 +16,6 @@ func FriendRoutes(r *gin.Engine, friendHandler *handler.FriendHandler) {
 		FriendRGroup.DELETE("/:friend_id", friendHandler.DeleteFriend)
 		FriendRGroup.GET("/:friend_id/messages", friendHandler.GetMessages)
 		FriendRGroup.POST("/:friend_id/messages", friendHandler.SendMessage)
+		FriendRGroup.POST("/:friend_id/api/gimini", friendHandler.SendMessageToGimini)
 	}
 }

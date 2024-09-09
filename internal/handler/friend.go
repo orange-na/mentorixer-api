@@ -6,6 +6,7 @@ import (
 
 	"main/internal/model"
 	"main/pkg/db"
+	"main/pkg/external/gimini"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -243,5 +244,58 @@ func (h *FriendHandler) SendMessage(c *gin.Context) {
 		return
 	}
 
-	c.Status(http.StatusCreated)
+	c.JSON(http.StatusCreated, message)
 }
+
+func (h *FriendHandler) SendMessageToGimini(c *gin.Context) {
+	user, exist := c.Get("user")
+	if !exist {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "user not found"})
+		return
+	}
+
+	u, ok := user.(model.User)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "user not found"})
+		return
+	}
+
+	friendID := c.Param("friend_id")
+
+	var room model.Room
+	err := db.DB.Where("user_id = ? AND friend_id = ?", u.ID, friendID).First(&room).Error
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	var sendMessageInput struct {
+		Content string `json:"content" binding:"required"`
+	}
+	err = c.ShouldBindJSON(&sendMessageInput)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	content, err := gimini.GenerateContent(sendMessageInput.Content)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	message := model.Message{
+		RoomID: room.ID,
+		FriendID: &room.FriendID,
+		Content: content,
+	}
+
+	err = db.DB.Create(&message).Error
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusCreated, content)
+}
+
