@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -262,8 +263,15 @@ func (h *FriendHandler) SendMessageToGimini(c *gin.Context) {
 
 	friendID := c.Param("friend_id")
 
+	var friend model.Friend
+	err := db.DB.Where("id = ?", friendID).First(&friend).Error
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
 	var room model.Room
-	err := db.DB.Where("user_id = ? AND friend_id = ?", u.ID, friendID).First(&room).Error
+	err = db.DB.Where("user_id = ? AND friend_id = ?", u.ID, friendID).First(&room).Error
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -278,7 +286,13 @@ func (h *FriendHandler) SendMessageToGimini(c *gin.Context) {
 		return
 	}
 
-	content, err := gimini.GenerateContent(sendMessageInput.Content)
+	var description string
+	if friend.Description != nil {
+		description = *friend.Description
+	}
+
+	prompt := fmt.Sprintf("以下の質問には、[%s]、[%d] 歳の [%s] 型で [%s] です。彼/彼女の特徴は次の通り: %s。その人になりきって、質問に回答してください。性格や価値観をその人の特徴に基づいて、できるだけ自然で一貫性のある応答をお願いします。」\n\n%s", friend.Name, friend.Age, friend.Mbti, friend.Gender, description, sendMessageInput.Content)
+	content, err := gimini.GenerateContent(prompt)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
