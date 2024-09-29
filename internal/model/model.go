@@ -18,7 +18,7 @@ type User struct {
 }
 
 type Friend struct {
-	ID                 uint 	`gorm:"primaryKey" json:"id"`
+	ID                  uint 	`gorm:"primaryKey" json:"id"`
 	UserID      		uint 	`gorm:"not null" json:"userId"`
 	User 	  			User 	`gorm:"foreignKey:UserID"`
 	Name    			string 	`gorm:"not null" json:"name"`
@@ -30,30 +30,30 @@ type Friend struct {
 	CreatedAt 			time.Time
 	UpdatedAt 			time.Time
 	DeletedAt 			*time.Time `gorm:"index"`
-	Rooms               []Room
-	Messages            []Message
+	Rooms               []Room     `gorm:"constraint:OnDelete:CASCADE"`
+	Messages            []Message  `gorm:"constraint:OnDelete:CASCADE"`
 }
 
 type Room struct {
 	ID         uint    `gorm:"primaryKey" json:"id"`
     UserID     uint    `gorm:"not null" json:"userId"`
     User       User    `gorm:"foreignKey:UserID" json:"-"`
-    FriendID   uint    `gorm:"not null" json:"friendId"`
+    FriendID   uint    `gorm:"not null;constraint:OnDelete:CASCADE" json:"friendId"`
     Friend     Friend  `gorm:"foreignKey:FriendID" json:"-"`
 	CreatedAt  time.Time
 	UpdatedAt  time.Time
 	DeletedAt  *time.Time `gorm:"index"`
-	Messages   []Message
+	Messages   []Message `gorm:"constraint:OnDelete:CASCADE"`
 }
 
 type Message struct {
 	ID         uint     `gorm:"primaryKey" json:"id"`
 	RoomID     uint     `json:"roomId"`
-	Room       Room     `gorm:"foreignKey:RoomID" json:"-"`
+	Room       Room     `gorm:"foreignKey:RoomID;constraint:OnDelete:CASCADE" json:"-"`
     UserID     *uint    `json:"userId"`
     User       *User    `gorm:"foreignKey:UserID" json:"-"`
     FriendID   *uint    `json:"friendId"`
-    Friend     *Friend  `gorm:"foreignKey:FriendID" json:"-"`
+    Friend     *Friend  `gorm:"foreignKey:FriendID;constraint:OnDelete:CASCADE" json:"-"`
 	Content    string   `gorm:"not null" json:"content"`
 	CreatedAt  time.Time
 	UpdatedAt  time.Time
