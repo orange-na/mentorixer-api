@@ -83,7 +83,7 @@ func (h *FriendHandler) CreateFriend(c *gin.Context) {
         return
     }
 
-	c.Status(http.StatusCreated)
+	c.JSON(http.StatusCreated, friend)
 }
 
 func (h *FriendHandler) EditFriend(c *gin.Context) {
